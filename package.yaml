@@ -1,0 +1,61 @@
+name:                pursnek
+version:             0.1.0.0
+synopsis:            PureScript-CoreFn-to-Python Compiler
+description:         A compiler backend for PureScript that generates Python code
+github:              "izumo-io/pursnek"
+license:             BSD-3-Clause
+license-file:        LICENSE
+author:              PureFunctor <purefunctor@gmail.com>
+copyright:           (c) 2021 PureFunctor
+build-type:          Simple
+tested-with:         GHC == 8.10.4
+
+extra-doc-files:     
+  - README.md
+  - CHANGELOG.md
+
+dependencies:
+  - base >= 4.14.1.0
+  - purescript -any
+  - purescript-cst -any
+
+default-extensions:
+  - ScopedTypeVariables
+  - NoImplicitPrelude
+
+ghc-options: 
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-uni-patterns
+  - -Wincomplete-record-updates
+  - -Wredundant-constraints
+  - -fhide-source-paths
+  - -Wmissing-export-lists
+  - -Wpartial-fields
+  - -Wmissing-deriving-strategies
+
+library:
+  source-dirs: src
+
+executables:
+  pursnek:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - pursnek
+
+tests:
+  pursnek-test:
+    main: Main.hs
+    source-dirs: test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - pursnek

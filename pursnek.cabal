@@ -1,0 +1,79 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           pursnek
+version:        0.1.0.0
+synopsis:       PureScript-CoreFn-to-Python Compiler
+description:    A compiler backend for PureScript that generates Python code
+homepage:       https://github.com/izumo-io/pursnek#readme
+bug-reports:    https://github.com/izumo-io/pursnek/issues
+author:         PureFunctor <purefunctor@gmail.com>
+maintainer:     PureFunctor <purefunctor@gmail.com>
+copyright:      (c) 2021 PureFunctor
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+tested-with:
+    GHC == 8.10.4
+extra-doc-files:
+    README.md
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/izumo-io/pursnek
+
+library
+  exposed-modules:
+      Language.Py
+  other-modules:
+      Paths_pursnek
+  hs-source-dirs:
+      src
+  default-extensions:
+      ScopedTypeVariables
+      NoImplicitPrelude
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wmissing-export-lists -Wpartial-fields -Wmissing-deriving-strategies
+  build-depends:
+      base >=4.14.1.0
+    , purescript
+    , purescript-cst
+  default-language: Haskell2010
+
+executable pursnek
+  main-is: Main.hs
+  other-modules:
+      Paths_pursnek
+  hs-source-dirs:
+      app
+  default-extensions:
+      ScopedTypeVariables
+      NoImplicitPrelude
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wmissing-export-lists -Wpartial-fields -Wmissing-deriving-strategies -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.14.1.0
+    , purescript
+    , purescript-cst
+    , pursnek
+  default-language: Haskell2010
+
+test-suite pursnek-test
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Paths_pursnek
+  hs-source-dirs:
+      test
+  default-extensions:
+      ScopedTypeVariables
+      NoImplicitPrelude
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wmissing-export-lists -Wpartial-fields -Wmissing-deriving-strategies -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.14.1.0
+    , purescript
+    , purescript-cst
+    , pursnek
+  default-language: Haskell2010
