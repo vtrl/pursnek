@@ -1,9 +1,10 @@
-name: Test
+name: Build and Test
 
 on: push
 
 jobs:
   test:
+    name: Test on Linux
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -30,8 +31,8 @@ jobs:
   
       - name: Build Package
         run: |
-          stack build --fast
+          stack build --system-ghc --fast
   
       - name: Test Package
         run: |
-          stack test --fast
+          stack test --system-ghc --fast
