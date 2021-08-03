@@ -75,7 +75,7 @@ data Py
   | PyBlock [Py]
   | PyListLiteral [Py]
   | PyDictLiteral [(PSString, Py)]
-  | PyAssignment Text Py
+  | PyAssignment Py Py
   | PyWhile Py Py
   | PyFor Text Py Py
   | PyIfElse Py Py (Maybe Py)
@@ -144,7 +144,7 @@ literals = PA.mkPattern' match
       , emit' "}"
       ]
     match (PyAssignment    n v) = runFold
-      [ emit' n  -- TODO: ensure normalization
+      [ prettyPrintPy n
       , emit' " = "
       , prettyPrintPy v
       ]
