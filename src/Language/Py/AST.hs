@@ -69,6 +69,8 @@ data Py
   | PyBinary BinaryOperator Py Py
   | PyFunctionDef Text [Text] Py
   | PyFunctionApp Py [Py]
+  | PyGetItem Py Py
+  | PyAttribute Py Text
   | PyVariable Text
   | PyBlock [Py]
   | PyListLiteral [Py]
@@ -158,6 +160,17 @@ literals = PA.mkPattern' match
       , do args <- mapM prettyPrintPy a
            pure $ PT.intercalate (PT.emit ", ") args
       , emit' ")"
+      ]
+    match (PyGetItem      m i) = runFold
+      [ prettyPrintPy m
+      , emit' "["
+      , prettyPrintPy i
+      , emit' "]"
+      ]
+    match (PyAttribute    o n) = runFold
+      [ prettyPrintPy o
+      , emit' "."
+      , emit' n
       ]
     match (PyReturn         p) = runFold
       [ emit' "return "
