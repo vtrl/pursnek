@@ -5,7 +5,7 @@ module Language.Py.AST where
 import Prelude
 
 import Control.Arrow ( runKleisli, (<+>) )
-import Control.Monad ( mzero )
+import Control.Monad ( forM, mzero )
 import Control.Monad.Trans.State ( StateT )
 import Control.PatternArrows ( Operator, OperatorTable, Pattern )
 import qualified Control.PatternArrows as PA
@@ -125,6 +125,22 @@ literals = PA.mkPattern' match
     match (PyBooleanLiteral  b) = emit' $ if b then "True" else "False"
     match (PyStringLiteral   s) = emit' $ prettyPrintStringPy s
     match (PyVariable        v) = emit' v  -- TODO: ensure normalization
+    match (PyListLiteral     l) = runFold
+      [ emit' "["
+      , do items <- mapM prettyPrintPy l
+           pure $ PT.intercalate (PT.emit ", ") items
+      , emit' "]"
+      ]
+    match (PyDictLiteral     l) = runFold
+      [ emit' "{"
+      , fmap mconcat $ forM l $ \(name, item) -> do
+          runFold [ emit' $ prettyPrintStringPy name
+                  , emit' ":"
+                  , prettyPrintPy item
+                  , emit' ","
+                  ]
+      , emit' "}"
+      ]
     match (PyAssignment    n v) = runFold
       [ emit' n  -- TODO: ensure normalization
       , emit' " = "
