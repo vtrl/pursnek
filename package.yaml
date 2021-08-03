@@ -16,10 +16,14 @@ extra-doc-files:
 
 dependencies:
   - base >= 4.14.1.0
+  - pattern-arrows
   - purescript -any
   - purescript-cst -any
+  - text
+  - transformers
 
 default-extensions:
+  - ImportQualifiedPost
   - ScopedTypeVariables
   - NoImplicitPrelude
 
@@ -31,9 +35,7 @@ ghc-options:
   - -Wincomplete-record-updates
   - -Wredundant-constraints
   - -fhide-source-paths
-  - -Wmissing-export-lists
   - -Wpartial-fields
-  - -Wmissing-deriving-strategies
 
 library:
   source-dirs: src
