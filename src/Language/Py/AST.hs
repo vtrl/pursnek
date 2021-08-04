@@ -291,3 +291,31 @@ prettyPrintStringPy purs =
     encode '"'  = "\\\""
     encode '\\' = "\\\\"
     encode c    = T.singleton c
+
+
+-- | Recursively apply `f` into the AST.
+everywhere :: (Py -> Py) -> Py -> Py
+everywhere f = go
+  where
+    go :: Py -> Py
+    go n@PyNoneLiteral        = f n
+    go n@(PyNumericLiteral _) = f n
+    go n@(PyBooleanLiteral _) = f n
+    go n@(PyStringLiteral  _) = f n
+    go n@(PyVariable       _) = f n
+    go (PyUnary          o p) = f (PyUnary o (go p))
+    go (PyBinary       o l r) = f (PyBinary o (go l) (go r))
+    go (PyFunctionDef  n a b) = f (PyFunctionDef n a (go b))
+    go (PyFunctionApp    p a) = f (PyFunctionApp (go p) (go <$> a))
+    go (PyGetItem        p i) = f (PyGetItem (go p) (go i))
+    go (PyAttribute      p n) = f (PyAttribute (go p) n)
+    go (PyBlock            s) = f (PyBlock (go <$> s))
+    go (PyListLiteral      i) = f (PyListLiteral (go <$> i))
+    go (PyDictLiteral      i) = f (PyDictLiteral (fmap go <$> i))
+    go (PyAssignment     p v) = f (PyAssignment (go p) (go v))
+    go (PyWhile          c b) = f (PyWhile (go c) (go b))
+    go (PyFor          n i b) = f (PyFor n (go i) (go b))
+    go (PyIfElse       c t e) = f (PyIfElse (go c) (go t) (go <$> e))
+    go (PyIfElif     c t d e) = f (PyIfElif (go c) (go t) (go d) (go e))
+    go (PyReturn           p) = f (PyReturn (go p))
+    go (PyRaise            p) = f (PyRaise (go p))
