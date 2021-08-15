@@ -76,12 +76,15 @@ data Py
   | PyListLiteral [Py]
   | PyDictLiteral [(PSString, Py)]
   | PyAssignment Py Py
+  | PyWalrus Py Py
   | PyWhile Py Py
   | PyFor Text Py Py
   | PyIfElse Py Py (Maybe Py)
   | PyIfElif Py Py Py Py
+  | PyTernary Py Py Py
   | PyReturn Py
   | PyRaise Py
+  | PyParenthesize Py
   deriving (Eq, Show)
 
 
@@ -148,6 +151,11 @@ literals = PA.mkPattern' match
       , emit' " = "
       , prettyPrintPy v
       ]
+    match (PyWalrus        n v) = runFold
+      [ prettyPrintPy n
+      , emit' " := "
+      , prettyPrintPy v
+      ]
     match (PyFunctionDef (Just n) a b) = runFold
       [ emit' "def "
       , emit' n
@@ -211,6 +219,15 @@ literals = PA.mkPattern' match
       , emit' ":"
       , prettyPrintPy e
       ]
+    match (PyTernary    t c e) = runFold
+      [ emit' "("
+      , prettyPrintPy t
+      , emit' " if "
+      , prettyPrintPy c
+      , emit' " else "
+      , prettyPrintPy e
+      , emit' ")"
+      ]
     match (PyWhile        c b) = runFold
       [ emit' "while "
       , prettyPrintPy c
@@ -222,6 +239,11 @@ literals = PA.mkPattern' match
       , prettyPrintPy r
       , emit' ":"
       , prettyPrintPy b
+      ]
+    match (PyParenthesize p) = runFold
+      [ emit' "("
+      , prettyPrintPy p
+      , emit' ")"
       ]
     match _ = mzero
 
@@ -319,9 +341,12 @@ everywhere f = go
     go (PyListLiteral      i) = f (PyListLiteral (go <$> i))
     go (PyDictLiteral      i) = f (PyDictLiteral (fmap go <$> i))
     go (PyAssignment     p v) = f (PyAssignment (go p) (go v))
+    go (PyWalrus         p v) = f (PyWalrus (go p) (go v))
     go (PyWhile          c b) = f (PyWhile (go c) (go b))
     go (PyFor          n i b) = f (PyFor n (go i) (go b))
     go (PyIfElse       c t e) = f (PyIfElse (go c) (go t) (go <$> e))
     go (PyIfElif     c t d e) = f (PyIfElif (go c) (go t) (go d) (go e))
+    go (PyTernary      c t e) = f (PyTernary (go c) (go t) (go e))
     go (PyReturn           p) = f (PyReturn (go p))
     go (PyRaise            p) = f (PyRaise (go p))
+    go (PyParenthesize     p) = f (PyParenthesize (go p))
