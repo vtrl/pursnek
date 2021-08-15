@@ -30,6 +30,7 @@ library
   exposed-modules:
       Language.Py
       Language.Py.AST
+      Language.Py.CodeGen
       Language.Py.Names
   other-modules:
       Paths_pursnek
