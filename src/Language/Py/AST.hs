@@ -67,7 +67,7 @@ data Py
   | PyNoneLiteral
   | PyUnary UnaryOperator Py
   | PyBinary BinaryOperator Py Py
-  | PyFunctionDef Text [Text] Py
+  | PyFunctionDef (Maybe Text) [Text] Py
   | PyFunctionApp Py [Py]
   | PyGetItem Py Py
   | PyAttribute Py Text
@@ -148,10 +148,16 @@ literals = PA.mkPattern' match
       , emit' " = "
       , prettyPrintPy v
       ]
-    match (PyFunctionDef n a b) = runFold
+    match (PyFunctionDef (Just n) a b) = runFold
       [ emit' "def "
       , emit' n
       , emit' ( "(" <> T.intercalate ", " a <> "):" )
+      , prettyPrintPy b
+      ]
+    match (PyFunctionDef Nothing a b) = runFold
+      [ emit' "lambda "
+      , emit' $ T.intercalate ", " a
+      , emit' ": "
       , prettyPrintPy b
       ]
     match (PyFunctionApp   f a) = runFold
