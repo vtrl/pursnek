@@ -32,6 +32,9 @@ library
       Language.Py.AST
       Language.Py.CodeGen
       Language.Py.Names
+      Language.Py.Optimizer
+      Language.Py.Optimizer.Common
+      Language.Py.Optimizer.Inliner
   other-modules:
       Paths_pursnek
   hs-source-dirs:
