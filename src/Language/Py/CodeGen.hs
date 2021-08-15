@@ -46,7 +46,10 @@ exprToPy (ObjectUpdate _ e u) = PyBinary BitwiseOr (exprToPy e) (PyDictLiteral $
 
 exprToPy (Abs _ i e) = PyFunctionDef Nothing [runIdent i] (exprToPy e)
 
-exprToPy (App _ f e) = PyFunctionApp (exprToPy f) [exprToPy e]
+exprToPy (App _ f e) = mkFunction f
+  where
+  mkFunction (Var (_, _, _, Just IsNewtype) _) = exprToPy e
+  mkFunction _ = PyFunctionApp (exprToPy f) [exprToPy e]
 
 exprToPy (Var _ (Qualified m i)) = PyVariable (normalizeModuleName <$> m) (runIdent i)
 
