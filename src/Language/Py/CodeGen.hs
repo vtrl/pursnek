@@ -29,10 +29,11 @@ exprToPy (Literal _ literal) = literalToPy literal
 
 exprToPy (Constructor _ t c a) =
   if not (null mr) then
-    PyFunctionDef Nothing a' (PyDictLiteral (mt : mc : mr))
+    fn (PyDictLiteral (mt : mc : mr))
   else
     PyDictLiteral [mt, mc]
   where
+  fn = foldl' (.) id (PyFunctionDef Nothing . pure <$> a')
   t' = runProperName t
   c' = runProperName c
   a' = runIdent <$> a
