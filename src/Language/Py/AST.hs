@@ -71,7 +71,7 @@ data Py
   | PyFunctionApp Py [Py]
   | PyGetItem Py Py
   | PyAttribute Py Text
-  | PyVariable Text
+  | PyVariable (Maybe Text) Text
   | PyBlock [Py]
   | PyListLiteral [Py]
   | PyDictLiteral [(PSString, Py)]
@@ -129,7 +129,12 @@ literals = PA.mkPattern' match
     match (PyNumericLiteral  n) = emit' $ T.pack $ either show show n
     match (PyBooleanLiteral  b) = emit' $ if b then "True" else "False"
     match (PyStringLiteral   s) = emit' $ prettyPrintStringPy s
-    match (PyVariable        v) = emit' v  -- TODO: ensure normalization
+    match (PyVariable Nothing v)  = emit' v  -- TODO: ensure normalization
+    match (PyVariable (Just m) v) = runFold
+      [ emit' m
+      , emit' "."
+      , emit' v
+      ]
     match (PyListLiteral     l) = runFold
       [ emit' "["
       , do items <- mapM prettyPrintPy l
@@ -330,7 +335,7 @@ everywhere f = go
     go n@(PyNumericLiteral _) = f n
     go n@(PyBooleanLiteral _) = f n
     go n@(PyStringLiteral  _) = f n
-    go n@(PyVariable       _) = f n
+    go n@(PyVariable     _ _) = f n
     go (PyUnary          o p) = f (PyUnary o (go p))
     go (PyBinary       o l r) = f (PyBinary o (go l) (go r))
     go (PyFunctionDef  n a b) = f (PyFunctionDef n a (go b))
