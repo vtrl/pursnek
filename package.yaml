@@ -26,6 +26,7 @@ default-extensions:
   - ImportQualifiedPost
   - ScopedTypeVariables
   - NoImplicitPrelude
+  - OverloadedStrings
 
 ghc-options: 
   - -Wall

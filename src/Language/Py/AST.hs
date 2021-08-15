@@ -11,9 +11,11 @@ import Control.PatternArrows ( Operator, OperatorTable, Pattern )
 import qualified Control.PatternArrows as PA
 import Data.Text ( Text )
 import qualified Data.Text as T
+import Language.PureScript.Names ( ModuleName(..) )
 import Language.PureScript.PSString ( PSString, decodeString )
 import Language.PureScript.Pretty.Common ( Emit, PrinterState(..) )
 import qualified Language.PureScript.Pretty.Common as PT
+import Language.Py.Names ( normalizeModuleName_ )
 
 
 -- | Built-in unary operators.
@@ -71,7 +73,7 @@ data Py
   | PyFunctionApp Py [Py]
   | PyGetItem Py Py
   | PyAttribute Py Text
-  | PyVariable (Maybe Text) Text
+  | PyVariable (Maybe ModuleName) Text
   | PyBlock [Py]
   | PyListLiteral [Py]
   | PyDictLiteral [(PSString, Py)]
@@ -129,9 +131,9 @@ literals = PA.mkPattern' match
     match (PyNumericLiteral  n) = emit' $ T.pack $ either show show n
     match (PyBooleanLiteral  b) = emit' $ if b then "True" else "False"
     match (PyStringLiteral   s) = emit' $ prettyPrintStringPy s
-    match (PyVariable Nothing v)  = emit' v  -- TODO: ensure normalization
-    match (PyVariable (Just m) v) = runFold
-      [ emit' m
+    match (PyVariable Nothing v) = emit' v
+    match (PyVariable (Just (ModuleName m)) v) = runFold
+      [ emit' (normalizeModuleName_ m)
       , emit' "."
       , emit' v
       ]

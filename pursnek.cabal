@@ -30,6 +30,7 @@ library
   exposed-modules:
       Language.Py
       Language.Py.AST
+      Language.Py.Names
   other-modules:
       Paths_pursnek
   hs-source-dirs:
@@ -38,6 +39,7 @@ library
       ImportQualifiedPost
       ScopedTypeVariables
       NoImplicitPrelude
+      OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wpartial-fields
   build-depends:
       base >=4.14.1.0
@@ -58,6 +60,7 @@ executable pursnek
       ImportQualifiedPost
       ScopedTypeVariables
       NoImplicitPrelude
+      OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14.1.0
@@ -80,6 +83,7 @@ test-suite pursnek-test
       ImportQualifiedPost
       ScopedTypeVariables
       NoImplicitPrelude
+      OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14.1.0
