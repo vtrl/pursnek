@@ -168,10 +168,12 @@ literals = PA.mkPattern' match
       , prettyPrintPy b
       ]
     match (PyFunctionDef Nothing a b) = runFold
-      [ emit' "lambda "
+      [ emit' "("
+      , emit' "lambda "
       , emit' $ T.intercalate ", " a
       , emit' ": "
       , prettyPrintPy b
+      , emit' ")"
       ]
     match (PyFunctionApp   f a) = runFold
       [ prettyPrintPy f
