@@ -86,6 +86,7 @@ data Py
   | PyReturn Py
   | PyRaise Py
   | PyParenthesize Py
+  | PyImport ModuleName
   deriving (Eq, Show)
 
 
@@ -253,6 +254,10 @@ literals = PA.mkPattern' match
       , prettyPrintPy p
       , emit' ")"
       ]
+    match (PyImport (ModuleName m)) = runFold
+      [ emit' "import "
+      , emit' m
+      ]
     match _ = mzero
 
 
@@ -339,6 +344,7 @@ everywhere f = go
     go n@(PyBooleanLiteral _) = f n
     go n@(PyStringLiteral  _) = f n
     go n@(PyVariable     _ _) = f n
+    go n@(PyImport         _) = f n
     go (PyUnary          o p) = f (PyUnary o (go p))
     go (PyBinary       o l r) = f (PyBinary o (go l) (go r))
     go (PyFunctionDef  n a b) = f (PyFunctionDef n a (go b))
