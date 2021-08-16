@@ -68,11 +68,14 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ =
     mkFunction (Var (_, _, _, Just IsNewtype) _) = exprToPy e
     mkFunction _ = PyFunctionApp (exprToPy f) [exprToPy e]
 
-  exprToPy (Var _ q) = qualifiedToPy q
+  exprToPy (Var (_, _, _, meta) q) = qualifiedToPy q
     where
-    qualifiedToPy (Qualified mn' i)
-      | Just mn == mn' = PyVariable Nothing (runIdentPy i)
-      | otherwise      = PyVariable (normalizeModuleName <$> mn') (runIdentPy i)
+    qualifiedToPy (Qualified mn' i) = PyVariable (normalizeModuleName <$> mName) (runIdentPy i)
+      where
+      mName | Just mn == mn' = case meta of
+                Just IsForeign -> Just $ ModuleName $ runModuleName mn <> "_foreign"
+                _ -> Nothing
+            | otherwise      = mn'
 
   exprToPy (Case _ e a) = chainTernaries . makeTernaries $ a
     where
