@@ -160,6 +160,8 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ =
                   )
                 ) cn
 
+          solveBinder v (ConstructorBinder (_, _, _, Just IsNewtype) _ _ b) = joinSolved $ solveBinder v <$> b
+
           solveBinder _ (ConstructorBinder (_, _, _, Nothing) _ _ _) = error "panic: malformed constructor"
 
           solveBinder _ _ = error "panic: unimplemented!"
