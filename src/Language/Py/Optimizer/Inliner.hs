@@ -15,7 +15,22 @@ import Language.Py.Optimizer.Common
 
 
 optimizeInline :: Py -> Py
-optimizeInline = inlineOperators
+optimizeInline = inlineOperators . inlineTernary . inlineBoolean
+
+
+inlineBoolean :: Py -> Py
+inlineBoolean = everywhere go where
+  go (PyBinary BooleanAnd r (PyBooleanLiteral True)) = r
+  go (PyBinary BooleanAnd (PyBooleanLiteral True) r) = r
+  go (PyBinary BooleanOr (PyBooleanLiteral True) _) = PyBooleanLiteral True
+  go (PyBinary BooleanOr r (PyBooleanLiteral True)) = r
+  go py = py
+
+
+inlineTernary :: Py -> Py
+inlineTernary = everywhere go where
+  go (PyTernary r (PyBooleanLiteral True) PyNoneLiteral) = r
+  go py = py
 
 
 inlineOperators :: Py -> Py
