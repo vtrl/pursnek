@@ -6,8 +6,9 @@ module Language.Py.CodeGen where
 import Prelude
 
 import Control.Applicative
-import Data.List ( foldl' )
+import Data.List ( foldl', intersect )
 import Data.Set ( Set )
+import qualified Data.Map as M
 import qualified Data.Set as S
 import qualified Data.Text as T
 import Language.PureScript.CoreFn
@@ -19,18 +20,33 @@ import Language.Py.Optimizer
 
 
 moduleToPy :: Module Ann -> Maybe Py -> [Py]
-moduleToPy (Module _ _ mn _ _ _ _ _ md) _ =
+moduleToPy (Module _ _ mn _ _ me re mi md) _ =
   let
     declarations = optimizeAll <$> foldMap (bindToPy PyAssignment) md
-    usedModules = S.toList $ foldMap findModules declarations
+    usedModules = map PyImport . S.toList $ foldMap findNonForeignModules declarations
+    foreignImport = [ PyImport (makeForeignModule . normalizeModuleName $ mn) | not (null mi) ]
+    reExports = foldMap (uncurry $ map . makeExport . normalizeModuleName) (M.toList re)
+    foreignExports = makeExport (makeForeignModule $ normalizeModuleName mn) <$> (me `intersect` mi)
   in
-    (PyImport <$> usedModules) <> declarations
+    concat
+    [ foreignImport
+    , usedModules
+    , reExports
+    , foreignExports
+    , declarations
+    ]
   where
-  findModules :: Py -> Set ModuleName
-  findModules = everything mappend go
+  findNonForeignModules :: Py -> Set ModuleName
+  findNonForeignModules = everything mappend go
     where
-    go (PyVariable (Just m) _) = S.singleton m
-    go _                       = mempty
+    go (PyVariable (Just m) _)
+      | not $ isForeignModule m  = S.singleton m
+    go _                         = mempty
+
+  makeExport :: ModuleName -> Ident -> Py
+  makeExport m i =
+    let i' = runIdentPy i
+    in PyAssignment (PyVariable Nothing i') (PyVariable (Just m) i')
 
   exprToPy :: Expr Ann -> Py
   exprToPy (Literal _ literal) = literalToPy literal
@@ -73,7 +89,7 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ =
     qualifiedToPy (Qualified mn' i) = PyVariable (normalizeModuleName <$> mName) (runIdentPy i)
       where
       mName | Just mn == mn' = case meta of
-                Just IsForeign -> Just $ ModuleName $ runModuleName mn <> "_foreign"
+                Just IsForeign -> Just $ makeForeignModule mn
                 _ -> Nothing
             | otherwise      = mn'
 
