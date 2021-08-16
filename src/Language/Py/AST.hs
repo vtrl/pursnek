@@ -9,6 +9,7 @@ import Control.Monad ( forM, mzero )
 import Control.Monad.Trans.State ( StateT )
 import Control.PatternArrows ( Operator, OperatorTable, Pattern )
 import qualified Control.PatternArrows as PA
+import Data.List ( foldl' )
 import Data.Text ( Text )
 import qualified Data.Text as T
 import Language.PureScript.Names ( ModuleName(..) )
@@ -364,3 +365,32 @@ everywhere f = go
     go (PyReturn           p) = f (PyReturn (go p))
     go (PyRaise            p) = f (PyRaise (go p))
     go (PyParenthesize     p) = f (PyParenthesize (go p))
+
+
+-- | Recursively apply an operation into the AST.
+everything :: (r -> r -> r) -> (Py -> r) -> (Py -> r)
+everything (<>.) f = go
+  where
+    go n@(PyUnary         _ p) = f n <>. go p
+    go n@(PyBinary      _ l r) = f n <>. go l <>. go r
+    go n@(PyFunctionDef _ _ r) = f n <>. go r
+    go n@(PyFunctionApp   m a) = foldl' (<>.) (f n <>. go m) (map go a)
+    go n@(PyGetItem       p i) = f n <>. go p <>. go i
+    go n@(PyAttribute     p _) = f n <>. go p
+    go n@(PyBlock           b) = foldl' (<>.) (f n) (map go b)
+    go n@(PyListLiteral     l) = foldl' (<>.) (f n) (map go l)
+    go n@(PyDictLiteral     d) = foldl' (<>.) (f n) (map (go . snd) d)
+    go n@(PyAssignment    p v) = f n <>. go p <>. go v
+    go n@(PyWalrus        p v) = f n <>. go p <>. go v
+    go n@(PyWhile         c b) = f n <>. go c <>. go b
+    go n@(PyFor         _ i b) = f n <>. go i <>. go b
+    go n@(PyIfElse     c t e_) =
+      case e_ of
+        Just e -> f n <>. go c <>. go t <>. go e
+        Nothing -> f n <>. go c <>. go t
+    go n@(PyIfElif    c t d e) = f n <>. go c <>. go t <>. go d <>. go e
+    go n@(PyTernary     c t e) = f n <>. go c <>. go t <>. go e
+    go n@(PyReturn          p) = f n <>. go p
+    go n@(PyRaise           p) = f n <>. go p
+    go n@(PyParenthesize    p) = f n <>. go p
+    go n = f n
