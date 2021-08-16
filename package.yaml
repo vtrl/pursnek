@@ -16,6 +16,7 @@ extra-doc-files:
 
 dependencies:
   - base >= 4.14.1.0
+  - containers
   - pattern-arrows
   - purescript -any
   - purescript-cst -any

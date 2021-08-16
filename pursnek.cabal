@@ -47,6 +47,7 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wpartial-fields
   build-depends:
       base >=4.14.1.0
+    , containers
     , pattern-arrows
     , purescript
     , purescript-cst
@@ -68,6 +69,7 @@ executable pursnek
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14.1.0
+    , containers
     , pattern-arrows
     , purescript
     , purescript-cst
@@ -91,6 +93,7 @@ test-suite pursnek-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.14.1.0
+    , containers
     , pattern-arrows
     , purescript
     , purescript-cst
