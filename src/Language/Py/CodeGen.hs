@@ -12,7 +12,7 @@ import Language.PureScript.CoreFn
 import Language.PureScript.Names
 import Language.PureScript.PSString
 import Language.Py.AST as Py
-import Language.Py.Names ( normalizeModuleName )
+import Language.Py.Names
 
 
 moduleToPy :: Module Ann -> Maybe Py -> [Py]
@@ -37,7 +37,7 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ = concatMap (bindToPy PyAssignment) md
     fn = foldl' (.) id (PyFunctionDef Nothing . pure <$> a')
     t' = runProperName t
     c' = runProperName c
-    a' = runIdent <$> a
+    a' = runIdentPy <$> a
     mt = (,) (mkString "$type$") (PyStringLiteral (mkString t'))
     mc = (,) (mkString "$cons$") (PyStringLiteral (mkString c'))
     mr = liftA2 (,) mkString (PyVariable Nothing) <$> a'
@@ -46,7 +46,7 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ = concatMap (bindToPy PyAssignment) md
 
   exprToPy (ObjectUpdate _ e u) = PyBinary BitwiseOr (exprToPy e) (PyDictLiteral $ fmap exprToPy <$> u)
 
-  exprToPy (Abs _ i e) = PyFunctionDef Nothing [runIdent i] (exprToPy e)
+  exprToPy (Abs _ i e) = PyFunctionDef Nothing [runIdentPy i] (exprToPy e)
 
   exprToPy (App _ f e) = mkFunction f
     where
@@ -56,8 +56,8 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ = concatMap (bindToPy PyAssignment) md
   exprToPy (Var _ q) = qualifiedToPy q
     where
     qualifiedToPy (Qualified mn' i)
-      | Just mn == mn' = PyVariable Nothing (runIdent i)
-      | otherwise      = PyVariable (normalizeModuleName <$> mn') (runIdent i)
+      | Just mn == mn' = PyVariable Nothing (runIdentPy i)
+      | otherwise      = PyVariable (normalizeModuleName <$> mn') (runIdentPy i)
 
   exprToPy (Case _ e a) = chainTernaries . makeTernaries $ a
     where
@@ -133,7 +133,7 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ = concatMap (bindToPy PyAssignment) md
           solveBinder v (ConstructorBinder (_, _, _, Just (IsConstructor _ fields)) _ c b) = solution
             where
             solution = ctorCheck $ joinSolved $ zipWith recurse fields b
-            recurse = solveBinder . PyGetItem v . PyStringLiteral . mkString . runIdent
+            recurse = solveBinder . PyGetItem v . PyStringLiteral . mkString . runIdentPy
             ctorCheck (cn, rm, cm) = (cn', rm, cm)
               where
               cn' =
@@ -150,7 +150,7 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ = concatMap (bindToPy PyAssignment) md
           solveBinder _ _ = error "panic: unimplemented!"
 
           renameVariable :: Ident -> Py -> (Py -> Py)
-          renameVariable i v = everywhere (\n -> if n == PyVariable Nothing (runIdent i) then v else n)
+          renameVariable i v = everywhere (\n -> if n == PyVariable Nothing (runIdentPy i) then v else n)
 
   exprToPy (Let _ b r) =
     PyFunctionApp
@@ -171,4 +171,4 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ = concatMap (bindToPy PyAssignment) md
 
   nonRecToPy :: (Py -> Py -> Py) -> Ident -> Expr Ann -> Py
   nonRecToPy f i e@(extractAnn -> (_, c, _, _)) | not (null c) = nonRecToPy f i (modifyAnn removeComments e)
-  nonRecToPy f i e = f (PyVariable Nothing $ runIdent i) (exprToPy e)
+  nonRecToPy f i e = f (PyVariable Nothing $ runIdentPy i) (exprToPy e)
