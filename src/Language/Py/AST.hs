@@ -15,7 +15,6 @@ import Language.PureScript.Names ( ModuleName(..) )
 import Language.PureScript.PSString ( PSString, decodeString )
 import Language.PureScript.Pretty.Common ( Emit, PrinterState(..) )
 import qualified Language.PureScript.Pretty.Common as PT
-import Language.Py.Names ( normalizeModuleName_ )
 
 
 -- | Built-in unary operators.
@@ -133,7 +132,7 @@ literals = PA.mkPattern' match
     match (PyStringLiteral   s) = emit' $ prettyPrintStringPy s
     match (PyVariable Nothing v) = emit' v
     match (PyVariable (Just (ModuleName m)) v) = runFold
-      [ emit' (normalizeModuleName_ m)
+      [ emit' m
       , emit' "."
       , emit' v
       ]
