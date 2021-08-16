@@ -1,5 +1,8 @@
 -- | Handles inlining of values and operators
-module Language.Py.Optimizer.Inliner (inlineOperators) where
+module Language.Py.Optimizer.Inliner
+  ( optimizeInline
+  , inlineOperators
+  ) where
 
 import Prelude
 
@@ -9,6 +12,10 @@ import Data.Text ( Text )
 import qualified Language.PureScript.Constants.Prelude as C
 import Language.Py.AST hiding ( binary, unary )
 import Language.Py.Optimizer.Common
+
+
+optimizeInline :: Py -> Py
+optimizeInline = inlineOperators
 
 
 inlineOperators :: Py -> Py
@@ -104,8 +111,8 @@ ringInt = (C.dataRing, C.ringInt)
 euclideanRingNumber :: forall a b. (IsString a, IsString b) => (a, b)
 euclideanRingNumber = (C.dataEuclideanRing, C.euclideanRingNumber)
 
-euclideanRingInt :: forall a b. (IsString a, IsString b) => (a, b)
-euclideanRingInt = (C.dataEuclideanRing, C.euclideanRingInt)
+-- euclideanRingInt :: forall a b. (IsString a, IsString b) => (a, b)
+-- euclideanRingInt = (C.dataEuclideanRing, C.euclideanRingInt)
 
 eqNumber :: forall a b. (IsString a, IsString b) => (a, b)
 eqNumber = (C.dataEq, C.eqNumber)
