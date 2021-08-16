@@ -53,7 +53,11 @@ moduleToPy (Module _ _ mn _ _ _ _ _ md) _ = concatMap (bindToPy PyAssignment) md
     mkFunction (Var (_, _, _, Just IsNewtype) _) = exprToPy e
     mkFunction _ = PyFunctionApp (exprToPy f) [exprToPy e]
 
-  exprToPy (Var _ (Qualified m i)) = PyVariable (normalizeModuleName <$> m) (runIdent i)
+  exprToPy (Var _ q) = qualifiedToPy q
+    where
+    qualifiedToPy (Qualified mn' i)
+      | Just mn == mn' = PyVariable Nothing (runIdent i)
+      | otherwise      = PyVariable (normalizeModuleName <$> mn') (runIdent i)
 
   exprToPy (Case _ e a) = chainTernaries . makeTernaries $ a
     where
