@@ -7,17 +7,32 @@ import Prelude
 
 import Control.Applicative
 import Data.List ( foldl' )
+import Data.Set ( Set )
+import qualified Data.Set as S
 import qualified Data.Text as T
 import Language.PureScript.CoreFn
 import Language.PureScript.Names
 import Language.PureScript.PSString
 import Language.Py.AST as Py
 import Language.Py.Names
+import Language.Py.Optimizer
 
 
 moduleToPy :: Module Ann -> Maybe Py -> [Py]
-moduleToPy (Module _ _ mn _ _ _ _ _ md) _ = concatMap (bindToPy PyAssignment) md
+moduleToPy (Module _ _ mn _ _ _ _ _ md) _ =
+  let
+    declarations = optimizeAll <$> foldMap (bindToPy PyAssignment) md
+    usedModules = S.toList $ foldMap findModules declarations
+  in
+    (PyImport <$> usedModules) <> declarations
   where
+  findModules :: Py -> Set ModuleName
+  findModules = everything mappend go
+    where
+    go (PyVariable (Just m) _) = S.singleton m
+    go _                       = mempty
+
+  exprToPy :: Expr Ann -> Py
   exprToPy (Literal _ literal) = literalToPy literal
     where
     literalToPy :: Literal (Expr Ann) -> Py
