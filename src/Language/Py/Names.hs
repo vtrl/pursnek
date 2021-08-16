@@ -15,4 +15,4 @@ normalizeModuleName_ :: Text -> Text
 normalizeModuleName_ = replace "." "_"
 
 runIdentPy :: Ident -> Text
-runIdentPy = replace "$" "_" . PS.runIdent
+runIdentPy = replace "'" "_" . replace "$" "_" . PS.runIdent
