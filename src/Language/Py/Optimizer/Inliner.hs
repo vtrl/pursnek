@@ -105,7 +105,10 @@ inlineOperators = everywhere $ foldl' (.) id
   binary' _ _ _ = id
 
   unary :: (Text, Text) -> (Text, Text) -> UnaryOperator -> (Py -> Py)
-  unary _ _ _ = id
+  unary f m o = replace where
+    replace (PyFunctionApp (PyFunctionApp m' [f']) [v])
+      | onModule m m' && onModule f f' = PyUnary o v
+    replace py = py
 
   unary' :: Text -> Text -> UnaryOperator -> (Py -> Py)
   unary' _ _ _ = id
