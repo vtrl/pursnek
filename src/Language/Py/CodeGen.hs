@@ -7,8 +7,8 @@ import Prelude
 
 import Control.Applicative
 import Data.List ( foldl', intersect )
-import Data.Set ( Set )
 import qualified Data.Map as M
+import Data.Set ( Set )
 import qualified Data.Set as S
 import qualified Data.Text as T
 import Language.PureScript.CoreFn
@@ -90,7 +90,7 @@ moduleToPy (Module _ _ mn _ _ me re mi md) _ =
       where
       mName | Just mn == mn' = case meta of
                 Just IsForeign -> Just $ makeForeignModule mn
-                _ -> Nothing
+                _              -> Nothing
             | otherwise      = mn'
 
   exprToPy (Case _ e a) = chainTernaries . makeTernaries $ a

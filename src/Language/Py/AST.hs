@@ -386,7 +386,7 @@ everything (<>.) f = go
     go n@(PyFor         _ i b) = f n <>. go i <>. go b
     go n@(PyIfElse     c t e_) =
       case e_ of
-        Just e -> f n <>. go c <>. go t <>. go e
+        Just e  -> f n <>. go c <>. go t <>. go e
         Nothing -> f n <>. go c <>. go t
     go n@(PyIfElif    c t d e) = f n <>. go c <>. go t <>. go d <>. go e
     go n@(PyTernary     c t e) = f n <>. go c <>. go t <>. go e
