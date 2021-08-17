@@ -96,18 +96,18 @@ inlineOperators = everywhere $ foldl' (.) id
   ]
   where
   binary :: (Text, Text) -> (Text, Text) -> BinaryOperator -> (Py -> Py)
-  binary f m o = replace where
-    replace (PyFunctionApp (PyFunctionApp (PyFunctionApp m' [f']) [l]) [r])
-      | onModule m m' && onModule f f' = PyBinary o l r
+  binary cls fnc o = replace where
+    replace (PyFunctionApp (PyFunctionApp (PyFunctionApp fnc' [cls']) [l]) [r])
+      | onModule cls cls' && onModule fnc fnc' = PyBinary o l r
     replace py = py
 
   binary' :: Text -> Text -> BinaryOperator -> (Py -> Py)
   binary' _ _ _ = id
 
   unary :: (Text, Text) -> (Text, Text) -> UnaryOperator -> (Py -> Py)
-  unary f m o = replace where
-    replace (PyFunctionApp (PyFunctionApp m' [f']) [v])
-      | onModule m m' && onModule f f' = PyUnary o v
+  unary cls fnc o = replace where
+    replace (PyFunctionApp (PyFunctionApp fnc' [cls']) [v])
+      | onModule cls cls' && onModule fnc fnc' = PyUnary o v
     replace py = py
 
   unary' :: Text -> Text -> UnaryOperator -> (Py -> Py)
