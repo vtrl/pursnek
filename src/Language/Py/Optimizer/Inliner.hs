@@ -102,7 +102,10 @@ inlineOperators = everywhere $ foldl' (.) id
     replace py = py
 
   binary' :: Text -> Text -> BinaryOperator -> (Py -> Py)
-  binary' _ _ _ = id
+  binary' m f o = replace where
+    replace (PyFunctionApp (PyFunctionApp f' [l]) [r])
+      | onModule (m, f) f'  = PyBinary o l r
+    replace py = py
 
   unary :: (Text, Text) -> (Text, Text) -> UnaryOperator -> (Py -> Py)
   unary cls fnc o = replace where
@@ -111,7 +114,10 @@ inlineOperators = everywhere $ foldl' (.) id
     replace py = py
 
   unary' :: Text -> Text -> UnaryOperator -> (Py -> Py)
-  unary' _ _ _ = id
+  unary' m f o  = replace where
+    replace (PyFunctionApp f' [v])
+      | onModule (m, f) f' = PyUnary o v
+    replace py = py
 
 
 semiringNumber :: forall a b. (IsString a, IsString b) => (a, b)
