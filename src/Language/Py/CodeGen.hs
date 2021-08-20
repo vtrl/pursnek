@@ -6,7 +6,7 @@ module Language.Py.CodeGen where
 import Prelude
 
 import Control.Applicative
-import Data.List ( foldl', intersect )
+import Data.List ( foldl', intersect, union )
 import qualified Data.Map as M
 import Data.Set ( Set )
 import qualified Data.Set as S
@@ -20,20 +20,24 @@ import Language.Py.Optimizer
 
 
 moduleToPy :: Module Ann -> Maybe Py -> [Py]
-moduleToPy (Module _ _ mn _ _ me re mi md) _ =
+moduleToPy (Module _ _ mn _ _ me re mf md) _ =
   let
-    declarations = optimizeAll <$> foldMap (bindToPy PyAssignment) md
-    usedModules = map PyImport . S.toList $ foldMap findNonForeignModules declarations
-    foreignImport = [ PyImport (makeForeignModule . normalizeModuleName $ mn) | not (null mi) ]
-    reExports = foldMap (uncurry $ map . makeExport . normalizeModuleName) (M.toList re)
-    foreignExports = makeExport (makeForeignModule $ normalizeModuleName mn) <$> (me `intersect` mi)
+    localDeclarations = optimizeAll <$> foldMap (bindToPy PyAssignment) md
+
+    localImports = map PyImport . S.toList $ foldMap findNonForeignModules localDeclarations
+    (exportImports, exportDeclarations) = fmap concat $ unzip $ makeImportExports <$> M.toList re
+
+    pursImports = localImports `union` exportImports
+    foreignImport = [ PyImport (makeForeignModule . normalizeModuleName $ mn) | not (null mf) ]
+
+    foreignDeclarations = makeExport (makeForeignModule $ normalizeModuleName mn) <$> (me `intersect` mf)
   in
     concat
     [ foreignImport
-    , usedModules
-    , reExports
-    , foreignExports
-    , declarations
+    , pursImports
+    , exportDeclarations
+    , localDeclarations
+    , foreignDeclarations
     ]
   where
   findNonForeignModules :: Py -> Set ModuleName
@@ -47,6 +51,14 @@ moduleToPy (Module _ _ mn _ _ me re mi md) _ =
   makeExport m i =
     let i' = runIdentPy i
     in PyAssignment (PyVariable Nothing i') (PyVariable (Just m) i')
+
+  makeImportExports :: (ModuleName, [Ident]) -> (Py, [Py])
+  makeImportExports (m, i) =
+    ( PyImport m'
+    , makeExport m' <$> i
+    )
+    where
+    m' = normalizeModuleName m
 
   exprToPy :: Expr Ann -> Py
   exprToPy (Literal _ literal) = literalToPy literal
