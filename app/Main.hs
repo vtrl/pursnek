@@ -83,5 +83,6 @@ compile Options{..} = do
     . reverse
     . FP.splitDirectories
 
+
 main :: IO ()
 main = execParser cli >>= compile

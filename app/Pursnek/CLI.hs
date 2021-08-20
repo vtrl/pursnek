@@ -5,13 +5,11 @@ import Prelude
 import Options.Applicative
 
 
-
 data Options = Options
   { psOutput :: FilePath
   , pyOutput :: FilePath
   , ffiPath  :: FilePath
   } deriving (Eq, Show)
-
 
 options :: Parser Options
 options = Options
@@ -24,7 +22,6 @@ options = Options
   <*> (option str (long "ffi" <> metavar "PATH")
      <|> pure "py-ffi"
       )
-
 
 cli :: ParserInfo Options
 cli = info (options <**> helper) $
