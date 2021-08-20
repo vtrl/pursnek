@@ -46,8 +46,14 @@ library
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wpartial-fields
   build-depends:
-      base >=4.14.1.0
+      Glob
+    , aeson
+    , base >=4.14.1.0
     , containers
+    , directory
+    , filepath
+    , mtl
+    , optparse-applicative
     , pattern-arrows
     , purescript
     , purescript-cst
@@ -58,6 +64,7 @@ library
 executable pursnek
   main-is: Main.hs
   other-modules:
+      Pursnek.CLI
       Paths_pursnek
   hs-source-dirs:
       app
@@ -68,8 +75,14 @@ executable pursnek
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.14.1.0
+      Glob
+    , aeson
+    , base >=4.14.1.0
     , containers
+    , directory
+    , filepath
+    , mtl
+    , optparse-applicative
     , pattern-arrows
     , purescript
     , purescript-cst
@@ -92,8 +105,14 @@ test-suite pursnek-test
       OverloadedStrings
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-uni-patterns -Wincomplete-record-updates -Wredundant-constraints -fhide-source-paths -Wpartial-fields -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.14.1.0
+      Glob
+    , aeson
+    , base >=4.14.1.0
     , containers
+    , directory
+    , filepath
+    , mtl
+    , optparse-applicative
     , pattern-arrows
     , purescript
     , purescript-cst
